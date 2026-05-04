@@ -35,15 +35,15 @@ Depende el dbt
 
 La usaria cuando el modelo sea liviano, tenga pocas transformaciones y se use como capa de limpieza inicial, pues no duplica almacenamiento y siempre lee la data más reciente.
 
-### Si es Table
+#### Si es Table
 
 La usuaria cuano el modelo tenga lógica pesada, joins, agregaciones o sea consumido directamente por dashboards. Esta tiene un mejor rendimiento para BI y tambien evita recalcular transformaciones complejas en cada consulta.
 
-### Si es Incremental
+#### Si es Incremental
 
 La Usaria cuando la tabla crezca continuamente y pueda cargarse por fecha, timestamp o llave de negocio, estos ultimos deben ser confiables.
 
-## 3. Dashboard lento en Metabase
+### Dashboard lento en Metabase
 
 Según la documentación de Metabase se recomienda revisar dashboards lentos considerando cantidad de tarjetas, consultas en cola, concurrencia, caché y consultas pesadas.
 1. Identificar si el problema está en Metabase o Snowflake.
@@ -60,7 +60,7 @@ Según la documentación de Metabase se recomienda revisar dashboards lentos con
    - Crear agregados mensuales para KPIs financieros.
    - Evitar SELECT *.
    
-## 4. Snowflake y costos
+### Snowflake y costos
 Problemas detectados en el query:
 - El `SELECT *`. Traer todas las columnas aumenta el volumen escaneado y transferido. En Snowflake conviene seleccionar solo las columnas necesarias, especialmente si hay columnas grandes como metadata VARIANT.
 - Tiene un filtro demasiado amplio para una ejecución cada hora. Filtra todo desde el 1 de enero de 2024. Eso hace que el escaneo crezca cada vez más. Si el proceso es horario, usaría una ventana incremental o construiría un modelo incremental en dbt con unique_key = inspection_id.
