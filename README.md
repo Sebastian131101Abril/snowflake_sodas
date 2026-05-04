@@ -1,7 +1,7 @@
 # Snowflake / dbt / Metabase / SODAS SAS
 
-## 1. Arquitectura propuesta
-
+## 1. Conceptos Fundamentales
+### Arquitectura popuesta
 Flujo general:
 
 Cloud SQL PostgreSQL → Fivetran → Snowflake → dbt → Metabase
@@ -59,22 +59,18 @@ Según la documentación de Metabase se recomienda revisar dashboards lentos con
    - Cambiar vistas pesadas por tablas o incrementales.
    - Crear agregados mensuales para KPIs financieros.
    - Evitar SELECT *.
+   
+## 4. Snowflake y costos
+Problemas detectados en el query:
+- El `SELECT *`. Traer todas las columnas aumenta el volumen escaneado y transferido. En Snowflake conviene seleccionar solo las columnas necesarias, especialmente si hay columnas grandes como metadata VARIANT.
+- Tiene un filtro demasiado amplio para una ejecución cada hora. Filtra todo desde el 1 de enero de 2024. Eso hace que el escaneo crezca cada vez más. Si el proceso es horario, usaría una ventana incremental o construiría un modelo incremental en dbt con unique_key = inspection_id.
+- El `ORDER BY` es costoso e innecesario para procesos batch pues ordenar todo el resultado por fecha puede ser caro, especialmente si no hay LIMIT o si el ordenamiento no es requerido para una tabla final. Si es solo para mostrar los últimos registros agregarle un `LIMIT 100`
+  
+Caracteristicas de snowflake que pueden servir:
+- Falta estrategia de clustering pues si inspections es una tabla grande y se filtra frecuentemente por fecha, evaluaría clustering por fecha o por combinación de fecha y cliente. No lo aplicaría automáticamente. Primero revisaría el Query Profile y funciones como SYSTEM$CLUSTERING_INFORMATION. Snowflake recomienda evaluar bien las clustering keys y evitar demasiadas columnas; para la mayoría de tablas recomienda máximo 3 o 4 columnas o expresiones en la key.
+- Un warehouse XL puede ser innecesario para una consulta que debería resolverse con un modelo agregado o incremental. Revisaría Query History, duración, bytes escaneados y concurrencia antes de escalar. Snowflake permite configurar auto suspend y auto resume en warehouses para controlar consumo cuando no hay actividad.
 
-## 5. Decisiones de performance y costo en Snowflake
-
-Para reducir costos y mejorar rendimiento:
-
-- Evitar `SELECT *`.
-- Consultar solo columnas necesarias.
-- Filtrar por rangos de fechas.
-- Evitar `ORDER BY` innecesarios.
-- Usar tablas agregadas para dashboards.
-- Revisar Query Profile antes de escalar warehouses.
-- Evaluar clustering keys solo en tablas grandes con filtros frecuentes.
-- Separar warehouses de ETL y BI.
-- Aprovechar result cache cuando aplique.
-
-## 5. Integración SODAS SAS
+## 2. SQL & Modelado en Snowflake
 
 Se recomienda que SODAS cargue archivos CSV en una carpeta cloud controlada o stage externo.
 
