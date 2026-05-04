@@ -18,7 +18,7 @@ Además, tendría en cuenta la forma en que Snowflake optimiza las consultas med
 - MARTS: tablas finales optimizadas para consumo en Metabase.
 - AUDIT: control de cargas, manifiestos, errores y alertas.
 
-## Convenciones de nomenclatura
+### Convenciones de nomenclatura
 
 Utilizaria la convención snake_case y prefijos según la capa de esta manera:
 
@@ -29,9 +29,9 @@ Utilizaria la convención snake_case y prefijos según la capa de esta manera:
 - `agg_`: tablas agregadas.
 - `mart_`: modelos finales de negocio.
 
-## 2. Criterios de materialización dbt
+### Criterios de materialización dbt
 Depende el dbt
-### Si es View
+#### Si es View
 
 La usaria cuando el modelo sea liviano, tenga pocas transformaciones y se use como capa de limpieza inicial, pues no duplica almacenamiento y siempre lee la data más reciente.
 
