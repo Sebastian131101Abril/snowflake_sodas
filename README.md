@@ -1,4 +1,4 @@
-# Prueba Técnica - Snowflake / dbt / Metabase / SODAS SAS
+# Snowflake / dbt / Metabase / SODAS SAS
 
 ## 1. Arquitectura propuesta
 
@@ -6,7 +6,11 @@ Flujo general:
 
 Cloud SQL PostgreSQL → Fivetran → Snowflake → dbt → Metabase
 
-Se propone separar los datos en capas:
+En Snowflake organizaría la información por capas, separando los datos crudos de los modelos que ya están preparados para análisis. Esto permite tener mayor orden, trazabilidad y control sobre las transformaciones realizadas.
+
+La capa RAW mantendría la información tal como llega desde la fuente, mientras que las capas de staging, intermedias y marts se usarían para limpiar, transformar y dejar los datos listos para consumo en herramientas como Metabase.
+
+Además, tendría en cuenta la forma en que Snowflake optimiza las consultas mediante micro partitions. Por eso, al diseñar los modelos, revisaría cuáles son los filtros más usados por los usuarios, por ejemplo fechas, cliente, CEDI o territorio. Con base en eso se podrían tomar decisiones de modelado y, si el volumen lo justifica, evaluar estrategias como clustering para mejorar el rendimiento sin aumentar innecesariamente el costo. De la siguiente manera:
 
 - RAW: datos crudos provenientes de Fivetran o archivos externos.
 - STAGING: limpieza, tipado, normalización y deduplicación básica.
