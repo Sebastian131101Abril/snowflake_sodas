@@ -18,9 +18,9 @@ Además, tendría en cuenta la forma en que Snowflake optimiza las consultas med
 - MARTS: tablas finales optimizadas para consumo en Metabase.
 - AUDIT: control de cargas, manifiestos, errores y alertas.
 
-## 2. Convenciones de nomenclatura
+## Convenciones de nomenclatura
 
-Se utiliza `snake_case` y prefijos según la capa:
+Utilizaria la convención snake_case y prefijos según la capa de esta manera:
 
 - `stg_`: modelos staging.
 - `int_`: modelos intermedios.
@@ -29,21 +29,38 @@ Se utiliza `snake_case` y prefijos según la capa:
 - `agg_`: tablas agregadas.
 - `mart_`: modelos finales de negocio.
 
-## 3. Criterios de materialización dbt
+## 2. Criterios de materialización dbt
+Depende el dbt
+### Si es View
 
-### View
+La usaria cuando el modelo sea liviano, tenga pocas transformaciones y se use como capa de limpieza inicial, pues no duplica almacenamiento y siempre lee la data más reciente.
 
-Se usa para modelos livianos de limpieza inicial, como `stg_clients` o `stg_geo_distribution`.
+### Si es Table
 
-### Table
+La usuaria cuano el modelo tenga lógica pesada, joins, agregaciones o sea consumido directamente por dashboards. Esta tiene un mejor rendimiento para BI y tambien evita recalcular transformaciones complejas en cada consulta.
 
-Se usa para modelos con joins, agregaciones o consumo frecuente desde Metabase.
+### Si es Incremental
 
-### Incremental
+La Usaria cuando la tabla crezca continuamente y pueda cargarse por fecha, timestamp o llave de negocio, estos ultimos deben ser confiables.
 
-Se usa para tablas grandes que crecen en el tiempo y tienen llave única, como `inspection_id`, `auxilio_id` o `alquiler_id`.
+## 3. Dashboard lento en Metabase
 
-## 4. Decisiones de performance y costo en Snowflake
+Según la documentación de Metabase se recomienda revisar dashboards lentos considerando cantidad de tarjetas, consultas en cola, concurrencia, caché y consultas pesadas.
+1. Identificar si el problema está en Metabase o Snowflake.
+   - ¿Todas las tarjetas son lentas o solo una?
+   - ¿El dashboard tiene muchos filtros?
+2. Revisar Query History y Query Profile en Snowflake pues permite revisar y explorar el Query Profile para ver los pasos de ejecución y los nodos más costosos de una consulta.
+   - Query ID de las consultas lanzadas por Metabase.
+   - Tiempo total de ejecución.
+   - Joins costosos.
+4. Revisar el modelo dbt que alimenta el dashboard.
+   - Si Metabase consulta directamente eso sería una mala práctica para KPIs financieros. Lo correcto sería crear una tabla o agregado en dbt.
+6. Revisar optimizaciones posibles.
+   - Cambiar vistas pesadas por tablas o incrementales.
+   - Crear agregados mensuales para KPIs financieros.
+   - Evitar SELECT *.
+
+## 5. Decisiones de performance y costo en Snowflake
 
 Para reducir costos y mejorar rendimiento:
 
