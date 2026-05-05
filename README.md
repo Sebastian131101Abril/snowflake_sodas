@@ -178,10 +178,7 @@ Pues Snowflake tiene Alerts para ejecutar acciones o enviar notificaciones cuand
 9. dbt ejecuta modelos INTERMEDIATE:
    - join con geo_distribution
    - enriquecimiento con territory, logistic_operator e inspection_site
-10. dbt ejecuta MARTS:
-   - fct_sodas_rentals
-   - fct_sodas_road_assistance
-   - agregados mensuales
+10. dbt ejecuta MARTS.
 11. dbt ejecuta tests de calidad.
 12. Si falla una validación, se genera alerta.
 13. Metabase consulta solo tablas MARTS o agregados.
