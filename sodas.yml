@@ -1,0 +1,284 @@
+version: 2
+
+models:
+
+  # ============================================================
+  # PUNTO 3. CASO REAL - INTEGRACIÓN SODAS SAS
+  # Validaciones para la tabla de segmentación geográfica.
+  # ============================================================
+
+  - name: stg_geo_distribution
+    description: "Tabla de segmentación geográfica usada para cruzar los datos de SODAS por CEDI."
+    columns:
+      - name: cedi
+        description: "Código del centro de distribución. Se usa como llave de cruce con SODAS."
+        tests:
+          - not_null
+          - unique
+
+      - name: territory
+        description: "Territorio asociado al CEDI."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Oriente', 'Occidente']
+
+      - name: logistic_operator
+        description: "Operador logístico asociado al CEDI."
+        tests:
+          - not_null
+
+      - name: inspection_site
+        description: "Sitio de inspección asociado al CEDI."
+
+
+  # ============================================================
+  # PUNTO 3. CASO REAL - INTEGRACIÓN SODAS SAS
+  # Validaciones para auxilios viales enviados por SODAS.
+  # ============================================================
+
+  - name: stg_sodas_road_assistance
+    description: "Modelo staging de auxilios viales enviados por SODAS."
+    columns:
+      - name: auxilio_id
+        description: "Identificador único del auxilio vial. Se usa para evitar duplicados."
+        tests:
+          - not_null
+          - unique
+
+      - name: placa
+        description: "Placa del vehículo que recibió el auxilio."
+        tests:
+          - not_null
+
+      - name: tipo_vehiculo
+        description: "Tipo de vehículo asociado al auxilio vial."
+
+      - name: cedi
+        description: "CEDI usado para cruzar con la tabla de segmentación geográfica."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_geo_distribution')
+              field: cedi
+
+      - name: fecha_auxilio
+        description: "Fecha en la que ocurrió el auxilio vial."
+        tests:
+          - not_null
+
+      - name: motivo
+        description: "Motivo reportado para el auxilio vial."
+
+      - name: tiempo_atencion
+        description: "Tiempo de atención del auxilio en minutos."
+
+      - name: estado
+        description: "Estado del auxilio vial."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['resuelto', 'en_proceso', 'cancelado']
+
+      - name: batch_id
+        description: "Identificador del lote de carga para trazabilidad."
+
+      - name: source_file
+        description: "Nombre del archivo enviado por SODAS."
+
+      - name: ingested_at
+        description: "Fecha y hora en la que el registro fue cargado a Snowflake."
+
+
+  # ============================================================
+  # PUNTO 3. CASO REAL - INTEGRACIÓN SODAS SAS
+  # Validaciones para alquileres de camiones enviados por SODAS.
+  # ============================================================
+
+  - name: stg_sodas_rentals
+    description: "Modelo staging de alquileres de camiones enviados por SODAS."
+    columns:
+      - name: alquiler_id
+        description: "Identificador único del alquiler. Se usa para evitar duplicados."
+        tests:
+          - not_null
+          - unique
+
+      - name: cedi
+        description: "CEDI usado para cruzar con la tabla de segmentación geográfica."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_geo_distribution')
+              field: cedi
+
+      - name: tipo_vehiculo
+        description: "Tipo de vehículo alquilado."
+        tests:
+          - not_null
+
+      - name: motivo_alquiler
+        description: "Motivo por el cual se realizó el alquiler."
+
+      - name: fecha_inicio
+        description: "Fecha de inicio del alquiler."
+        tests:
+          - not_null
+
+      - name: fecha_fin
+        description: "Fecha de finalización del alquiler."
+
+      - name: costo
+        description: "Costo del alquiler en COP."
+        tests:
+          - not_null
+
+      - name: proveedor
+        description: "Proveedor que prestó el servicio de alquiler."
+
+      - name: batch_id
+        description: "Identificador del lote de carga para trazabilidad."
+
+      - name: source_file
+        description: "Nombre del archivo enviado por SODAS."
+
+      - name: ingested_at
+        description: "Fecha y hora en la que el registro fue cargado a Snowflake."
+
+
+  # ============================================================
+  # PUNTO 3. CASO REAL - INTEGRACIÓN SODAS SAS
+  # Validaciones para modelos intermedios enriquecidos.
+  # ============================================================
+
+  - name: int_sodas_road_assistance_enriched
+    description: "Modelo intermedio de auxilios viales enriquecido con territorio, operador logístico y sitio de inspección."
+    columns:
+      - name: auxilio_id
+        description: "Identificador único del auxilio vial."
+        tests:
+          - not_null
+          - unique
+
+      - name: cedi
+        description: "CEDI usado para el cruce con la segmentación geográfica."
+        tests:
+          - not_null
+
+      - name: territory
+        description: "Territorio obtenido desde geo_distribution. Puede quedar nulo si el CEDI no existe en la tabla maestra."
+
+      - name: logistic_operator
+        description: "Operador logístico obtenido desde geo_distribution."
+
+      - name: inspection_site
+        description: "Sitio de inspección obtenido desde geo_distribution."
+
+
+  - name: int_sodas_rentals_enriched
+    description: "Modelo intermedio de alquileres enriquecido con territorio, operador logístico y sitio de inspección."
+    columns:
+      - name: alquiler_id
+        description: "Identificador único del alquiler."
+        tests:
+          - not_null
+          - unique
+
+      - name: cedi
+        description: "CEDI usado para el cruce con la segmentación geográfica."
+        tests:
+          - not_null
+
+      - name: dias_alquiler
+        description: "Duración del alquiler en días, calculada a partir de fecha_inicio y fecha_fin."
+
+      - name: territory
+        description: "Territorio obtenido desde geo_distribution. Puede quedar nulo si el CEDI no existe en la tabla maestra."
+
+      - name: logistic_operator
+        description: "Operador logístico obtenido desde geo_distribution."
+
+      - name: inspection_site
+        description: "Sitio de inspección obtenido desde geo_distribution."
+
+
+  # ============================================================
+  # PUNTO 3 Y DASHBOARD SODAS
+  # Validaciones para tablas finales consumidas por Metabase.
+  # ============================================================
+
+  - name: fct_sodas_road_assistance
+    description: "Tabla final de auxilios viales para consumo en Metabase."
+    columns:
+      - name: auxilio_id
+        description: "Identificador único del auxilio vial."
+        tests:
+          - not_null
+          - unique
+
+      - name: placa
+        description: "Placa del vehículo asociado al auxilio."
+        tests:
+          - not_null
+
+      - name: fecha_auxilio
+        description: "Fecha del auxilio vial."
+        tests:
+          - not_null
+
+      - name: estado
+        description: "Estado final u operativo del auxilio."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['resuelto', 'en_proceso', 'cancelado']
+
+      - name: cedi
+        description: "Centro de distribución asociado al auxilio."
+        tests:
+          - not_null
+
+      - name: territory
+        description: "Territorio usado para análisis en el dashboard."
+
+      - name: tiempo_atencion
+        description: "Tiempo de atención del auxilio en minutos."
+
+
+  - name: fct_sodas_rentals
+    description: "Tabla final de alquileres de camiones para consumo en Metabase."
+    columns:
+      - name: alquiler_id
+        description: "Identificador único del alquiler."
+        tests:
+          - not_null
+          - unique
+
+      - name: fecha_inicio
+        description: "Fecha de inicio del alquiler."
+        tests:
+          - not_null
+
+      - name: fecha_fin
+        description: "Fecha de finalización del alquiler."
+
+      - name: costo
+        description: "Costo del alquiler en COP."
+        tests:
+          - not_null
+
+      - name: cedi
+        description: "Centro de distribución asociado al alquiler."
+        tests:
+          - not_null
+
+      - name: territory
+        description: "Territorio usado para análisis en el dashboard."
+
+      - name: tipo_vehiculo
+        description: "Tipo de vehículo alquilado."
+        tests:
+          - not_null
+
+      - name: motivo_alquiler
+        description: "Motivo del alquiler."
