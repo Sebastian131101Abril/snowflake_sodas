@@ -153,17 +153,7 @@ En dbt agregaría pruebas de calidad en el .yml, principalmente:
 
 En resumen, la integración quedaría así:
 
-Archivos SODAS
-   ↓
-RAW landing
-   ↓
-STAGING: limpieza, tipado y deduplicación
-   ↓
-INTERMEDIATE: cruce con geo_distribution por CEDI
-   ↓
-MARTS: tablas finales para Metabase
-   ↓
-Dashboard SODAS
+Archivos SODAS -> RAW landing -> STAGING: limpieza, tipado y deduplicación -> INTERMEDIATE: cruce con geo_distribution por CEDI -> MARTS: tablas finales para Metabase -> Dashboard SODAS
 
 Con esta estructura se mantiene trazabilidad, se evita consultar datos crudos directamente y se deja una capa final más estable y optimizada para análisis.
 
