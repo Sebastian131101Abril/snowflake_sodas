@@ -1,5 +1,3 @@
-# Snowflake / dbt / Metabase / SODAS SAS
-
 ## 1. Conceptos Fundamentales
 ### Arquitectura popuesta
 Flujo general:
