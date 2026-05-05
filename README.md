@@ -71,6 +71,7 @@ Caracteristicas de snowflake que pueden servir:
 - Un warehouse XL puede ser innecesario para una consulta que debería resolverse con un modelo agregado o incremental. Revisaría Query History, duración, bytes escaneados y concurrencia antes de escalar. Snowflake permite configurar auto suspend y auto resume en warehouses para controlar consumo cuando no hay actividad.
 
 ## Caso Real — Integración SODAS SAS
+Revisar el archivo .yml se encuentran las pruebas de calidad y documentación de modelos dbt.
 
 ### Mecanismo para que SODAS cargue su data
 SODAS no tiene equipo técnico y la data llega de forma esporádica. Por eso, evitaría una integración compleja al inicio.
